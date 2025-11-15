@@ -1,0 +1,3 @@
+main.js
+
+Here we got another loadplans but dropdown. This part of code in in reserve.html. Starts fron fetching again and convert j son to object again. Then in default text of drop down will be some message to and if other value in drop down is not selcted, the declare button will stay disable. Here's how it works we set defeult stet of declare button as disable and set declareStatus.textContent = "Declaration Status: Not Declared". Then we add eventlistener that if drop down is changed and that value is not an empty string --> declareStatus.textContent = "Declaration Status: Declared"; and declare button will turn enable.

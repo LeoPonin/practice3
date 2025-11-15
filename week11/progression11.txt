@@ -1,0 +1,15 @@
+not sure if it's ok to put just about project here but Im gonna do it anyway.
+
+db.js
+This file mainly(only) contain about connection of database but since we dont wanna make the connection infomation appear in script file we gonna expoert it as pool.
+
+-------------------------------------------------------------------------------
+
+./routes/plans.js
+(not frontend at all but it's js, I guess) plans.js import pool db but as we can see that we dont need to define WHICH variable to import because we export pool as default in db.js. This file focus on createting new method for frontend.
+
+-------------------------------------------------------------------------------
+
+loadplans.js
+
+This on is a part of script for index. It starts from fetch data by calling backend. Then there is .ok, what the hell is .ok? It's a built- of fetching respose as boolean from status code, 200 = true 404= false something like that. So if fetching is not success it will throw error. If successthen convert json to js object. Them make sure content that inside table is empty before insert with fetched data. Then for every record of column will be add as text content and append record by record.
