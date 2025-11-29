@@ -1,0 +1,31 @@
+reserve.js
+
+This week is all about POST and PUT HTTP methods for declaring study plans. The file has three main functions that handle creating and updating student's declared plans through backend API calls.
+
+-------------------------------------------------------------------------------
+
+postDeclaredPlan() function
+
+This function is for creating NEW declared plan using POST method. It takes studentId, token, and payload as parameters. Then it makes a fetch request to backend endpoint `/api/v1/students/${studentId}/declared-plan` with POST method. The headers include Authorization with Bearer token (because we need to be authenticated to do this) and Content-Type as application/json. The body is the payload converted to JSON string which contains the planId. Pretty standard POST request structure.
+
+-------------------------------------------------------------------------------
+
+putDeclaredPlan() function
+
+Almost identical to POST version but uses PUT method instead. This one is for UPDATING existing declared plan. Same parameters, same headers, same endpoint, just different HTTP method. Why separate functions? Because it makes the code cleaner and easier to read than having one function with if-else for method selection.
+
+-------------------------------------------------------------------------------
+
+declarePlan() function
+
+Here's where all the magic happens. This is the main function that decides whether to POST or PUT based on isUpdate parameter. First it gets token from localStorage and decode it to extract studentId from preferred_username. Then grabs the selected planId from dropdown. If no plan selected then show alert and bail out.
+
+After that it creates payload object with planId as number (important to convert because form values are strings). Then decides which function to use - putDeclaredPlan for updates or postDeclaredPlan for new declarations.
+
+The try-catch block handles all the responses. For UPDATE (PUT) case it checks for status 200 = success, then it merges the updated data with study plans, converts UTC timestamp to local time format, and updates the UI to show when plan was declared. Also shows "Declaration updated" message in modal. If status is 409 it means plan was cancelled so can't update - show specific error message. If 404 then no declared plan found.
+
+For CREATE (POST) case status 201 = success and just reload the declared plan. If 409 here it means student already declared a plan so show message about that.
+
+Both cases handle server errors (500, 502, 503) by showing friendly "try again later" message instead of scary technical errors. The catch block handles any network errors or unexpected failures.
+
+Overall this function is pretty robust with proper error handling for different scenarios. It's good practice to handle specific status codes differently rather than just checking ok or not ok!

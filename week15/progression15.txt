@@ -1,0 +1,27 @@
+reserve.js
+
+This week is all about DELETE method and canceling declared plans. This file contains one big function that handles the cancellation flow with confirmation dialog and all the UI state management. It's definitely the most complex one so far because it needs to handle user confirmation and multiple different response scenarios.
+
+-------------------------------------------------------------------------------
+
+cancelDeclaredPlan() function
+
+ First it gets the token and studentId like usual. Then it grabs references to all the UI elements we need to manage - confirmModal, buttons (cancel, keep, ok), status label, dropdown, declare button, change button, and cancel button element. That's a lot of elements but we need them all for the UI updates.
+
+Next up is building confirmation message. It converts the UTC timestamp to local format and gets browser timezone, then sets msgBox text to show user what they declared and when, asking if they're sure they want to cancel. Then it shows the cancel and keep buttons while hiding the normal OK button. This transforms the error modal into a confirmation dialog. Pretty clever reuse of existing modal!
+
+The modal opens with showModal() and now we wait for user to click something. If user clicks "Keep Declaration" button then we just reset the modal back to normal state (hide cancel/keep buttons, show OK button again) and close the dialog. Nothing else happens, declaration stays as is.
+
+But if user clicks "Cancel Declaration" button then things get interesting. It makes a DELETE request to backend endpoint with Authorization header. Then resets the modal buttons back to normal and closes the dialog before processing response.
+
+For status 204 (successful deletion with no content) it updates statusLabel to "Not Declared", hides cancel button, enables dropdown and clears its value, disables declare button until user selects a plan, shows declare button and hides change button. Then adds onchange handler to dropdown so declare button only enables when something is selected. Finally shows "Declaration cancelled" message and reloads declared plan data.
+
+For status 200 (successful with JSON response per PBI7) the backend returns the declared-plan with status CANCELLED. So we parse the JSON, merge it with study plans, and update status label with "Cancelled [planCode] - [nameEng] plan on [date] ([timezone])" format. Then we enable dropdown, set its value to the cancelled plan, show and enable declare button (for re-declaration), hide change and cancel buttons. Show "Declaration cancelled" message and reload data.
+
+For status 409 it means plan is already cancelled. Backend returns error JSON with message so we try to parse it and show that message, or fallback to default "already cancelled" message. Then reload declared plan data.
+
+For status 404 no declared record found so we set status to "Not Declared", reset dropdown to empty and disabled state, disable declare button, hide change and cancel buttons, show error message and reload data.
+
+Any other error shows generic "problem, try again later" message. The catch block also handles network errors with same generic message and makes sure to reset modal buttons to normal state.
+
+Wow this function is complex! But it handles all edge cases properly with good error messages for each scenario. The confirmation dialog UX is nice because user can change their mind. And the UI state management ensures everything stays consistent no matter what response we get from backend.

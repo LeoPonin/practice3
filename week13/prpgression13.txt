@@ -1,0 +1,30 @@
+reserve.js
+
+This file is all about Keycloak authentication and protecting pages from unauthorized access. this week have a lot of things happen with the troblesome boi(keycloak boi)
+First we got some constants at the top for BACKEND_URL, KEYCLOAK_AUTH_URL, REALM, CLIENT_ID, and BASE_PATH. These are configuration stuffs that we need for connecting to Keycloak server and our backend. BASE_PATH is kinda clever because it removes the filename from current path so we can build proper redirect URLs(not 100% sure how it works).
+
+-------------------------------------------------------------------------------
+
+decodeToken() function
+
+This function is pretty straightforward . It takes JWT token and decode it to get the payload inside. How? By splitting the token by dots (JWT has 3 parts separated by dots), take the middle part which is the payload, and use atob() to decode from base64. Then parse it as JSON. If anything goes wrong just return null. This is safer than just decoding without error handling.
+
+-------------------------------------------------------------------------------
+
+exchangeCodeForToken() function
+
+Here's where OAuth2 authorization code flow happens. when user logs in through Keycloak, they get redirected back with a code parameter in URL. This function grabs that code from URL params. If there's no code then we're done here, just return. If we have code then we need to exchange it for actual access token by making POST request to Keycloak token endpoint. We send grant_type, client_id, the code itself, and redirect_uri (which must match what we used before). If response is ok then we store access_token and refresh_token in localStorage for later use. Finally we clean up URL by removing the code parameter using replaceState so user doesn't see ugly code in URL bar.
+
+-------------------------------------------------------------------------------
+
+protectPage() function
+
+This is the bouncer of the page. It checks if there's a token in localStorage. If no token then user is not logged in so we redirect them to Keycloak login page. We build the login URL with all necessary params like client_id, redirect_uri (where to come back after login), response_type=code (because we're using authorization code flow), and prompt=login to force login screen. If token exists then we do nothing and let user stay on page.
+
+-------------------------------------------------------------------------------
+
+displayUserInfo() function
+
+Last but not least this function shows who is logged in. It decodes the token to get user info and if there's a name in the decoded token then it displays "Welcome, [name]" in element with id "ecors-fullname". Simple and friendly way to greet the user.
+
+i hate keycloak
